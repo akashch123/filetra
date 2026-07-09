@@ -1,0 +1,16 @@
+{
+  "name": "filetra",
+  "version": "1.0.0",
+  "description": "Private P2P File Sharing - CaramelDrop",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "keywords": ["p2p", "file-sharing", "peer-to-peer"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
