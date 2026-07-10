@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Is Peer-to-Peer File Sharing Safe? WebRTC Security Explained Simply</title>
+<meta name="description" content="Is P2P file sharing secure? Learn how WebRTC encrypts every browser-to-browser transfer with DTLS, why no server ever sees your file, and what to watch out for.">
+<link rel="canonical" href="https://filetra.vercel.app/blog/is-p2p-file-sharing-safe.html">
+<meta property="og:title" content="Is Peer-to-Peer File Sharing Safe? WebRTC Security Explained Simply">
+<meta property="og:description" content="Is P2P file sharing secure? Learn how WebRTC encrypts every browser-to-browser transfer with DTLS, why no server ever sees your file, and what to watch out for.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://filetra.vercel.app/blog/is-p2p-file-sharing-safe.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Is Peer-to-Peer File Sharing Safe? WebRTC Security Explained Simply", "description": "Is P2P file sharing secure? Learn how WebRTC encrypts every browser-to-browser transfer with DTLS, why no server ever sees your file, and what to watch out for.", "url": "https://filetra.vercel.app/blog/is-p2p-file-sharing-safe.html", "datePublished": "2026-07-09", "author": {"@type": "Organization", "name": "Filetra"}, "publisher": {"@type": "Organization", "name": "Filetra"}}</script>
+<style>
+:root{--bg:#faf6f1;--card:#fff;--brown-900:#3e2723;--brown-700:#5d4037;--caramel:#c8792a;--caramel-dark:#a35e1a;--caramel-light:#f4e3d0;--text:#3e2f28;--muted:#8d7b72;--radius:18px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px clamp(20px,6vw,80px)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:22px;color:var(--brown-900);text-decoration:none}
+.logo-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--caramel),var(--caramel-dark));display:grid;place-items:center;color:#fff;font-size:19px;box-shadow:0 4px 12px rgba(200,121,42,.35)}
+nav a{color:var(--brown-700);text-decoration:none;margin-left:26px;font-size:15px;font-weight:500}
+nav a:hover{color:var(--caramel-dark)}
+main{max-width:760px;margin:0 auto;padding:20px 20px 70px}
+article h1{font-size:clamp(28px,4vw,38px);line-height:1.2;color:var(--brown-900);margin:18px 0 10px}
+.post-meta{color:var(--muted);font-size:14px;margin-bottom:28px}
+article h2{font-size:23px;color:var(--brown-900);margin:36px 0 12px}
+article h3{font-size:18px;color:var(--brown-900);margin:26px 0 10px}
+article p{margin-bottom:16px;font-size:16.5px}
+article ul,article ol{margin:0 0 16px 24px}
+article li{margin-bottom:8px;font-size:16.5px}
+article a{color:var(--caramel-dark)}
+.cta{background:var(--caramel-light);border-radius:var(--radius);padding:26px;margin:38px 0;text-align:center}
+.cta h3{margin-top:0}
+.cta p{color:var(--brown-700)}
+.btn{display:inline-block;background:var(--caramel);color:#fff;text-decoration:none;font-weight:600;padding:12px 26px;border-radius:10px;margin-top:8px}
+.btn:hover{background:var(--caramel-dark)}
+.post-card{background:var(--card);border-radius:var(--radius);padding:26px;margin-bottom:20px;box-shadow:0 4px 18px rgba(62,39,35,.06)}
+.post-card h2{margin:0 0 8px;font-size:20px}
+.post-card a{color:var(--brown-900);text-decoration:none}
+.post-card a:hover{color:var(--caramel-dark)}
+.post-card p{color:var(--muted);font-size:15px;margin:0}
+footer{text-align:center;padding:26px;color:var(--muted);font-size:13px;border-top:1px solid #efe5d9;margin-top:40px}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-mark">&#128232;</span>Filetra</a>
+  <nav><a href="/">Share a file</a><a href="/blog/">Blog</a></nav>
+</header>
+<main>
+<article>
+<h1>Is Peer-to-Peer File Sharing Safe? Security Explained Simply</h1>
+<p class="post-meta">Filetra Blog &middot; July 2026</p>
+
+<p>"Peer-to-peer" earned a shady reputation in the file-sharing wars of the 2000s. But the P2P used by modern browser file transfer has nothing to do with public torrent networks — it's a private, encrypted, one-to-one channel between two people who share a link. Here's what actually happens under the hood.</p>
+
+<h2>Every transfer is encrypted by default</h2>
+<p>Browser-to-browser transfers run on <strong>WebRTC</strong>, the same technology behind Google Meet and WhatsApp calls. Every WebRTC data channel is mandatorily encrypted with <strong>DTLS</strong> (the datagram version of TLS, the protocol securing HTTPS). This is not an optional setting — an unencrypted WebRTC connection is impossible by specification. Someone snooping on your network sees only ciphertext.</p>
+
+<h2>No server ever holds your file</h2>
+<p>With cloud sharing, you have to trust the provider's storage, their employees, their retention policy, and their breach history. With direct transfer there is nothing to breach: <strong>the file exists only on your device and the recipient's</strong>. A tiny signaling server helps the two browsers find each other — it exchanges connection metadata, never file contents.</p>
+
+<h2>The link is the key — treat it like one</h2>
+<p>Anyone who has the share link while your tab is open can request the file. Practical implications:</p>
+<ul>
+<li>Send the link over a channel you trust (a direct message, not a public post).</li>
+<li>The link works only while your tab is open — close it and the link is permanently dead.</li>
+<li>There is no lingering copy for someone to find next month.</li>
+</ul>
+
+<h2>What P2P transfer doesn't protect against</h2>
+<p>Honesty matters in security. Direct transfer can't help if the <em>recipient's</em> device is compromised, and like most connections it exposes your IP address to the person you're transferring with — the same as any video call. If you need to hide your IP from your own recipient, you'd need a VPN on top.</p>
+
+<h2>Verdict</h2>
+<p>For sending a file to a person you know, peer-to-peer transfer is one of the most private options available: end-to-end encrypted in transit, zero server-side storage, and self-destructing by design. Try it on <a href="/">Filetra</a> — or read <a href="/blog/share-files-no-size-limit-guide.html">the step-by-step guide</a> first.</p>
+
+<div class="cta"><h3>Try it now &mdash; free, no sign-up</h3><p>Share a file of any size directly from your browser. Nothing is uploaded to a server.</p><a class="btn" href="/">Share a file with Filetra</a></div>
+</article>
+</main>
+<footer>Filetra &mdash; peer-to-peer file sharing. Files transfer directly between browsers via WebRTC.</footer>
+</body>
+</html>

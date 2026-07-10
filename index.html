@@ -3,499 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CaramelDrop — Private P2P File Sharing</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<title>Filetra Blog — File Sharing Guides & Privacy Tips</title>
+<meta name="description" content="Guides on sending large files free, peer-to-peer transfer security, and private file sharing without the cloud.">
+<link rel="canonical" href="https://filetra.vercel.app/blog/">
+<meta property="og:title" content="Filetra Blog — File Sharing Guides & Privacy Tips">
+<meta property="og:description" content="Guides on sending large files free, peer-to-peer transfer security, and private file sharing without the cloud.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://filetra.vercel.app/blog/">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "headline": "Filetra Blog \u2014 File Sharing Guides & Privacy Tips", "description": "Guides on sending large files free, peer-to-peer transfer security, and private file sharing without the cloud.", "url": "https://filetra.vercel.app/blog/"}</script>
 <style>
-  :root {
-    --bg: #faf6f1;
-    --card: #ffffff;
-    --brown-900: #3e2723;
-    --brown-700: #5d4037;
-    --caramel: #c8792a;
-    --caramel-dark: #a35e1a;
-    --caramel-light: #f4e3d0;
-    --green: #2e7d32;
-    --red: #c62828;
-    --text: #3e2f28;
-    --muted: #8d7b72;
-    --radius: 18px;
-    --shadow: 0 10px 40px rgba(62, 39, 35, .10);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ---------- Header ---------- */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px clamp(20px, 6vw, 80px);
-  }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; color: var(--brown-900); text-decoration: none; cursor: pointer; }
-  .logo-mark {
-    width: 38px; height: 38px; border-radius: 12px;
-    background: linear-gradient(135deg, var(--caramel), var(--caramel-dark));
-    display: grid; place-items: center; color: #fff; font-size: 19px;
-    box-shadow: 0 4px 12px rgba(200, 121, 42, .35);
-  }
-  nav a { color: var(--brown-700); text-decoration: none; margin-left: 26px; font-size: 15px; font-weight: 500; }
-  nav a:hover { color: var(--caramel-dark); }
-
-  /* ---------- Hero layout ---------- */
-  .hero {
-    flex: 1;
-    display: flex; align-items: center; justify-content: center; gap: clamp(30px, 6vw, 90px);
-    padding: 30px clamp(20px, 6vw, 80px) 60px;
-    flex-wrap: wrap;
-  }
-  .hero-text { max-width: 480px; }
-  .hero-text h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.15; color: var(--brown-900); margin-bottom: 18px; }
-  .hero-text h1 span { color: var(--caramel); }
-  .hero-text p { font-size: 17px; line-height: 1.6; color: var(--muted); margin-bottom: 26px; }
-  .badges { display: flex; gap: 12px; flex-wrap: wrap; }
-  .badge {
-    display: flex; align-items: center; gap: 7px;
-    background: var(--caramel-light); color: var(--brown-700);
-    padding: 8px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
-  }
-
-  /* ---------- Card ---------- */
-  .card {
-    width: min(440px, 92vw);
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 34px 30px;
-  }
-  .panel { display: none; }
-  .panel.active { display: block; animation: fade .35s ease; }
-  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-  /* Drop zone */
-  .dropzone {
-    border: 2.5px dashed #d9c3ab;
-    border-radius: 14px;
-    padding: 46px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-    background: #fffdfa;
-  }
-  .dropzone:hover, .dropzone.drag { border-color: var(--caramel); background: var(--caramel-light); }
-  .dropzone .dz-icon { font-size: 44px; margin-bottom: 12px; }
-  .dropzone h3 { color: var(--brown-900); font-size: 18px; margin-bottom: 6px; }
-  .dropzone p { color: var(--muted); font-size: 14px; }
-  .dz-note { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 14px; }
-
-  /* File row */
-  .file-row {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--caramel-light);
-    border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;
-  }
-  .file-ico { font-size: 26px; }
-  .file-meta { flex: 1; min-width: 0; }
-  .file-meta .fname { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--brown-900); }
-  .file-meta .fsize { font-size: 12.5px; color: var(--muted); }
-  .x-btn { background: none; border: none; cursor: pointer; font-size: 17px; color: var(--muted); padding: 4px; }
-  .x-btn:hover { color: var(--red); }
-
-  /* Link box */
-  .link-box {
-    display: flex; gap: 8px; margin-bottom: 14px;
-  }
-  .link-box input {
-    flex: 1; min-width: 0; border: 1.5px solid #e8dccf; border-radius: 10px;
-    padding: 11px 12px; font-size: 13px; color: var(--brown-700); background: #fffdfa;
-  }
-  .btn {
-    border: none; border-radius: 10px; padding: 11px 18px;
-    font-size: 14.5px; font-weight: 600; cursor: pointer; transition: all .15s;
-    background: var(--caramel); color: #fff;
-  }
-  .btn:hover { background: var(--caramel-dark); }
-  .btn.ghost { background: transparent; color: var(--brown-700); border: 1.5px solid #e0d2c2; }
-  .btn.ghost:hover { background: var(--caramel-light); }
-  .btn.full { width: 100%; }
-
-  .status-line { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--muted); margin: 6px 0 4px; }
-  .pulse {
-    width: 9px; height: 9px; border-radius: 50%; background: var(--caramel); flex-shrink: 0;
-    animation: pulse 1.4s ease infinite;
-  }
-  .pulse.ok { background: var(--green); animation: none; }
-  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1);} 50% { opacity: .35; transform: scale(.75);} }
-
-  /* Progress */
-  .prog-wrap { margin-top: 16px; }
-  .prog-bar { height: 10px; background: #f0e6da; border-radius: 999px; overflow: hidden; }
-  .prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--caramel), var(--caramel-dark)); border-radius: 999px; transition: width .2s; }
-  .prog-info { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-top: 7px; }
-
-  .warn {
-    background: #fff7e8; border: 1px solid #f1dfbe; color: #8a6d3b;
-    border-radius: 10px; padding: 10px 13px; font-size: 12.8px; margin-top: 16px; line-height: 1.45;
-  }
-  .error-msg { color: var(--red); font-size: 13.5px; margin-top: 12px; display: none; }
-
-  .center { text-align: center; }
-  .big-ico { font-size: 52px; margin-bottom: 14px; }
-  h2.panel-title { color: var(--brown-900); font-size: 21px; margin-bottom: 8px; }
-  p.panel-sub { color: var(--muted); font-size: 14.5px; line-height: 1.55; margin-bottom: 18px; }
-
-  /* ---------- Features ---------- */
-  .features {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 22px; padding: 50px clamp(20px, 6vw, 80px) 70px; max-width: 1200px; margin: 0 auto; width: 100%;
-  }
-  .feat { background: var(--card); border-radius: var(--radius); padding: 26px; box-shadow: 0 4px 18px rgba(62,39,35,.06); }
-  .feat .f-ico {
-    width: 46px; height: 46px; border-radius: 13px; background: var(--caramel-light);
-    display: grid; place-items: center; font-size: 22px; margin-bottom: 14px;
-  }
-  .feat h3 { font-size: 16.5px; color: var(--brown-900); margin-bottom: 7px; }
-  .feat p { font-size: 14px; color: var(--muted); line-height: 1.55; }
-
-  footer { text-align: center; padding: 26px; color: var(--muted); font-size: 13px; border-top: 1px solid #efe5d9; }
-
-  @media (max-width: 720px) {
-    nav { display: none; }
-    .hero { padding-top: 8px; }
-    .hero-text { text-align: center; }
-    .badges { justify-content: center; }
-  }
+:root{--bg:#faf6f1;--card:#fff;--brown-900:#3e2723;--brown-700:#5d4037;--caramel:#c8792a;--caramel-dark:#a35e1a;--caramel-light:#f4e3d0;--text:#3e2f28;--muted:#8d7b72;--radius:18px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px clamp(20px,6vw,80px)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:22px;color:var(--brown-900);text-decoration:none}
+.logo-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--caramel),var(--caramel-dark));display:grid;place-items:center;color:#fff;font-size:19px;box-shadow:0 4px 12px rgba(200,121,42,.35)}
+nav a{color:var(--brown-700);text-decoration:none;margin-left:26px;font-size:15px;font-weight:500}
+nav a:hover{color:var(--caramel-dark)}
+main{max-width:760px;margin:0 auto;padding:20px 20px 70px}
+article h1{font-size:clamp(28px,4vw,38px);line-height:1.2;color:var(--brown-900);margin:18px 0 10px}
+.post-meta{color:var(--muted);font-size:14px;margin-bottom:28px}
+article h2{font-size:23px;color:var(--brown-900);margin:36px 0 12px}
+article h3{font-size:18px;color:var(--brown-900);margin:26px 0 10px}
+article p{margin-bottom:16px;font-size:16.5px}
+article ul,article ol{margin:0 0 16px 24px}
+article li{margin-bottom:8px;font-size:16.5px}
+article a{color:var(--caramel-dark)}
+.cta{background:var(--caramel-light);border-radius:var(--radius);padding:26px;margin:38px 0;text-align:center}
+.cta h3{margin-top:0}
+.cta p{color:var(--brown-700)}
+.btn{display:inline-block;background:var(--caramel);color:#fff;text-decoration:none;font-weight:600;padding:12px 26px;border-radius:10px;margin-top:8px}
+.btn:hover{background:var(--caramel-dark)}
+.post-card{background:var(--card);border-radius:var(--radius);padding:26px;margin-bottom:20px;box-shadow:0 4px 18px rgba(62,39,35,.06)}
+.post-card h2{margin:0 0 8px;font-size:20px}
+.post-card a{color:var(--brown-900);text-decoration:none}
+.post-card a:hover{color:var(--caramel-dark)}
+.post-card p{color:var(--muted);font-size:15px;margin:0}
+footer{text-align:center;padding:26px;color:var(--muted);font-size:13px;border-top:1px solid #efe5d9;margin-top:40px}
 </style>
 </head>
 <body>
-
 <header>
-  <a class="logo" onclick="location.href = location.pathname"><span class="logo-mark">🍬</span>CaramelDrop</a>
-  <nav>
-    <a href="#how">How it works</a>
-    <a href="#features">Features</a>
-  </nav>
+  <a class="logo" href="/"><span class="logo-mark">&#128232;</span>Filetra</a>
+  <nav><a href="/">Share a file</a><a href="/blog/">Blog</a></nav>
 </header>
-
-<div class="hero">
-  <div class="hero-text">
-    <h1>Share files <span>directly</span>.<br>No cloud. No limits.</h1>
-    <p>Your files travel straight from your browser to the receiver's — end-to-end, peer-to-peer. Nothing is ever uploaded to a server, so there's no size limit and nothing left behind.</p>
-    <div class="badges">
-      <span class="badge">🔒 Peer-to-peer</span>
-      <span class="badge">♾️ No size limit</span>
-      <span class="badge">⚡ No sign-up</span>
-    </div>
-  </div>
-
-  <div class="card">
-
-    <!-- SEND: pick file -->
-    <div class="panel active" id="panel-pick">
-      <div class="dropzone" id="dropzone">
-        <div class="dz-icon">📁</div>
-        <h3>Drop a file here</h3>
-        <p>or click to browse</p>
-      </div>
-      <input type="file" id="fileInput" hidden>
-      <div class="dz-note">Files are streamed directly — keep this tab open while sharing.</div>
-    </div>
-
-    <!-- SEND: link ready / transferring -->
-    <div class="panel" id="panel-share">
-      <div class="file-row">
-        <div class="file-ico">📄</div>
-        <div class="file-meta">
-          <div class="fname" id="sFileName"></div>
-          <div class="fsize" id="sFileSize"></div>
-        </div>
-        <button class="x-btn" title="Cancel" onclick="resetAll()">✕</button>
-      </div>
-
-      <div id="linkArea">
-        <p class="panel-sub" style="margin-bottom:10px">Send this link to the receiver. The transfer starts the moment they open it.</p>
-        <div class="link-box">
-          <input type="text" id="shareLink" readonly onclick="this.select()">
-          <button class="btn" id="copyBtn" onclick="copyLink()">Copy</button>
-        </div>
-        <div class="status-line"><span class="pulse" id="sendPulse"></span><span id="sendStatus">Waiting for receiver…</span></div>
-      </div>
-
-      <div class="prog-wrap" id="sendProg" style="display:none">
-        <div class="prog-bar"><div class="prog-fill" id="sendFill"></div></div>
-        <div class="prog-info"><span id="sendPct">0%</span><span id="sendSpeed"></span></div>
-      </div>
-
-      <div class="warn">⚠️ Keep this page open. Closing it stops the transfer — your file lives only on your device.</div>
-      <div class="error-msg" id="sendError"></div>
-    </div>
-
-    <!-- RECEIVE: connecting -->
-    <div class="panel" id="panel-recv-wait" >
-      <div class="center">
-        <div class="big-ico">🔗</div>
-        <h2 class="panel-title">Connecting to sender…</h2>
-        <p class="panel-sub">Establishing a direct, encrypted connection.</p>
-        <div class="status-line" style="justify-content:center"><span class="pulse"></span><span id="recvWaitStatus">Contacting peer…</span></div>
-      </div>
-      <div class="error-msg" id="recvError"></div>
-    </div>
-
-    <!-- RECEIVE: incoming file -->
-    <div class="panel" id="panel-recv">
-      <div class="center">
-        <div class="big-ico">📥</div>
-        <h2 class="panel-title">Incoming file</h2>
-      </div>
-      <div class="file-row">
-        <div class="file-ico">📄</div>
-        <div class="file-meta">
-          <div class="fname" id="rFileName"></div>
-          <div class="fsize" id="rFileSize"></div>
-        </div>
-      </div>
-      <button class="btn full" id="acceptBtn" onclick="acceptFile()">Download file</button>
-      <div class="prog-wrap" id="recvProg" style="display:none">
-        <div class="prog-bar"><div class="prog-fill" id="recvFill"></div></div>
-        <div class="prog-info"><span id="recvPct">0%</span><span id="recvSpeed"></span></div>
-      </div>
-    </div>
-
-    <!-- DONE -->
-    <div class="panel" id="panel-done">
-      <div class="center">
-        <div class="big-ico">✅</div>
-        <h2 class="panel-title" id="doneTitle">Transfer complete!</h2>
-        <p class="panel-sub" id="doneSub"></p>
-        <button class="btn full" onclick="resetAll()">Share another file</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="features" id="features">
-  <div class="feat">
-    <div class="f-ico">🕵️</div>
-    <h3>Truly private</h3>
-    <p>Files move directly between browsers over an encrypted WebRTC channel. No server ever stores your data.</p>
-  </div>
-  <div class="feat">
-    <div class="f-ico">♾️</div>
-    <h3>No size limits</h3>
-    <p>Because nothing is uploaded, there's no quota. Share files as large as your connection can handle.</p>
-  </div>
-  <div class="feat" id="how">
-    <div class="f-ico">⚡</div>
-    <h3>Instant &amp; simple</h3>
-    <p>Pick a file, copy the link, send it. The download starts the moment your receiver opens the link.</p>
-  </div>
-  <div class="feat">
-    <div class="f-ico">🌱</div>
-    <h3>Nothing left behind</h3>
-    <p>Close the tab and the link is dead. No expiring buckets, no forgotten uploads, no cleanup.</p>
-  </div>
-</div>
-
-<footer>CaramelDrop — peer-to-peer file sharing demo. Files transfer directly between browsers via WebRTC.</footer>
-
-<script>
-'use strict';
-
-const CHUNK_SIZE = 64 * 1024;          // 64 KB
-const MAX_BUFFER = 8 * 1024 * 1024;    // 8 MB backpressure threshold
-const $ = id => document.getElementById(id);
-
-let peer = null, conn = null, file = null;
-
-function showPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  $(id).classList.add('active');
-}
-function fmtSize(b) {
-  if (b < 1024) return b + ' B';
-  const u = ['KB','MB','GB','TB']; let i = -1;
-  do { b /= 1024; i++; } while (b >= 1024 && i < u.length - 1);
-  return b.toFixed(b >= 100 ? 0 : 1) + ' ' + u[i];
-}
-function fmtSpeed(bps) { return fmtSize(bps) + '/s'; }
-function fail(elId, msg) { const e = $(elId); e.textContent = msg; e.style.display = 'block'; }
-function resetAll() {
-  try { conn && conn.close(); } catch(e) {}
-  try { peer && peer.destroy(); } catch(e) {}
-  location.href = location.pathname; // clean reload, drops hash
-}
-
-/* ==================== SENDER ==================== */
-
-const dz = $('dropzone'), fi = $('fileInput');
-dz.addEventListener('click', () => fi.click());
-fi.addEventListener('change', () => fi.files[0] && startSharing(fi.files[0]));
-['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
-['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
-dz.addEventListener('drop', e => e.dataTransfer.files[0] && startSharing(e.dataTransfer.files[0]));
-
-function startSharing(f) {
-  file = f;
-  $('sFileName').textContent = f.name;
-  $('sFileSize').textContent = fmtSize(f.size);
-  showPanel('panel-share');
-  $('sendStatus').textContent = 'Preparing link…';
-
-  peer = new Peer();
-  peer.on('open', id => {
-    $('shareLink').value = location.origin + location.pathname + '#' + id;
-    $('sendStatus').textContent = 'Waiting for receiver…';
-  });
-  peer.on('error', err => {
-    fail('sendError', 'Connection error: ' + err.type + '. Reload and try again.');
-  });
-  peer.on('connection', c => {
-    conn = c;
-    c.on('open', () => {
-      $('sendStatus').textContent = 'Receiver connected — waiting for accept…';
-      $('sendPulse').classList.add('ok');
-      c.send({ type: 'meta', name: file.name, size: file.size, mime: file.type });
-    });
-    c.on('data', d => { if (d && d.type === 'accept') sendFile(c); });
-    c.on('close', () => {
-      if (!transferDone) fail('sendError', 'Receiver disconnected.');
-    });
-  });
-}
-
-let transferDone = false;
-
-async function sendFile(c) {
-  $('linkArea').style.display = 'none';
-  $('sendProg').style.display = 'block';
-  $('sendStatus').textContent = 'Sending…';
-
-  const total = file.size;
-  let offset = 0, lastT = Date.now(), lastB = 0;
-
-  while (offset < total) {
-    // backpressure: wait for the channel buffer to drain
-    if (c.dataChannel && c.dataChannel.bufferedAmount > MAX_BUFFER) {
-      await new Promise(r => setTimeout(r, 50));
-      continue;
-    }
-    const chunk = await file.slice(offset, offset + CHUNK_SIZE).arrayBuffer();
-    c.send(chunk);
-    offset += chunk.byteLength;
-
-    const now = Date.now();
-    if (now - lastT > 300 || offset >= total) {
-      const pct = Math.floor(offset / total * 100);
-      $('sendFill').style.width = pct + '%';
-      $('sendPct').textContent = pct + '% · ' + fmtSize(offset) + ' / ' + fmtSize(total);
-      $('sendSpeed').textContent = fmtSpeed((offset - lastB) / ((now - lastT) / 1000 || 1));
-      lastT = now; lastB = offset;
-    }
-  }
-  c.send({ type: 'done' });
-  transferDone = true;
-  $('doneTitle').textContent = 'File sent!';
-  $('doneSub').textContent = '"' + file.name + '" was delivered directly to the receiver.';
-  showPanel('panel-done');
-}
-
-/* ==================== RECEIVER ==================== */
-
-let meta = null, chunks = [], received = 0, rLastT = 0, rLastB = 0;
-
-function startReceiving(senderId) {
-  showPanel('panel-recv-wait');
-  peer = new Peer();
-  peer.on('open', () => {
-    $('recvWaitStatus').textContent = 'Connecting to sender…';
-    conn = peer.connect(senderId, { reliable: true });
-    conn.on('open', () => { $('recvWaitStatus').textContent = 'Connected — waiting for file info…'; });
-    conn.on('data', onRecvData);
-    conn.on('close', () => {
-      if (meta && received < meta.size) fail('recvError', 'Sender disconnected before the transfer finished.');
-    });
-    conn.on('error', () => fail('recvError', 'Connection failed. Ask the sender for a fresh link.'));
-  });
-  peer.on('error', err => {
-    const msg = err.type === 'peer-unavailable'
-      ? 'Sender not found. The link may have expired — the sender must keep their tab open.'
-      : 'Connection error: ' + err.type;
-    fail('recvError', msg);
-  });
-}
-
-function onRecvData(d) {
-  if (d && d.type === 'meta') {
-    meta = d;
-    $('rFileName').textContent = meta.name;
-    $('rFileSize').textContent = fmtSize(meta.size);
-    showPanel('panel-recv');
-    return;
-  }
-  if (d && d.type === 'done') { finishDownload(); return; }
-  // binary chunk (ArrayBuffer or typed view)
-  const buf = d instanceof ArrayBuffer ? d : (d && d.buffer ? d.buffer : null);
-  if (!buf) return;
-  chunks.push(buf);
-  received += buf.byteLength;
-
-  const now = Date.now();
-  if (now - rLastT > 300 || received >= meta.size) {
-    const pct = Math.floor(received / meta.size * 100);
-    $('recvFill').style.width = pct + '%';
-    $('recvPct').textContent = pct + '% · ' + fmtSize(received) + ' / ' + fmtSize(meta.size);
-    $('recvSpeed').textContent = fmtSpeed((received - rLastB) / ((now - rLastT) / 1000 || 1));
-    rLastT = now; rLastB = received;
-  }
-}
-
-function acceptFile() {
-  $('acceptBtn').style.display = 'none';
-  $('recvProg').style.display = 'block';
-  rLastT = Date.now(); rLastB = 0;
-  conn.send({ type: 'accept' });
-}
-
-function finishDownload() {
-  const blob = new Blob(chunks, { type: meta.mime || 'application/octet-stream' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = meta.name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 30000);
-  chunks = [];
-  $('doneTitle').textContent = 'Download complete!';
-  $('doneSub').textContent = '"' + meta.name + '" (' + fmtSize(meta.size) + ') was saved to your device.';
-  showPanel('panel-done');
-}
-
-/* ==================== MISC ==================== */
-
-function copyLink() {
-  const input = $('shareLink');
-  input.select();
-  (navigator.clipboard ? navigator.clipboard.writeText(input.value) : Promise.reject())
-    .catch(() => document.execCommand('copy'))
-    .finally(() => {
-      $('copyBtn').textContent = 'Copied!';
-      setTimeout(() => $('copyBtn').textContent = 'Copy', 1600);
-    });
-}
-
-window.addEventListener('beforeunload', e => {
-  if ((file && !transferDone && conn) || (meta && received < meta.size)) {
-    e.preventDefault(); e.returnValue = '';
-  }
-});
-
-// Route: hash present → receiver mode
-const senderId = location.hash.slice(1);
-if (senderId) startReceiving(senderId);
-</script>
+<main>
+<article><h1>Filetra Blog</h1>
+<p class="post-meta">Guides on peer-to-peer file sharing, privacy, and sending large files.</p>
+<div class="post-card"><h2><a href="/blog/how-to-send-large-files-free-without-cloud.html">How to Send Large Files for Free — Without Uploading to the Cloud</a></h2><p>Send large files free with no size limit and no account. Learn how peer-to-peer file transfer sends files directly between browsers, skipping cloud upload entirely.</p></div>
+<div class="post-card"><h2><a href="/blog/filetra-vs-wetransfer-vs-google-drive.html">Filetra vs WeTransfer vs Google Drive: Which Should You Use?</a></h2><p>WeTransfer caps free transfers, Google Drive uses your quota, and both store files on servers. See how direct peer-to-peer sharing compares on size limits, speed, and privacy.</p></div>
+<div class="post-card"><h2><a href="/blog/is-p2p-file-sharing-safe.html">Is Peer-to-Peer File Sharing Safe? Security Explained Simply</a></h2><p>Is P2P file sharing secure? Learn how WebRTC encrypts every browser-to-browser transfer with DTLS, why no server ever sees your file, and what to watch out for.</p></div>
+<div class="post-card"><h2><a href="/blog/share-files-no-size-limit-guide.html">How to Share Files with No Size Limit: A Step-by-Step Guide</a></h2><p>A step-by-step guide to sharing files of any size for free — no account, no upload, no compression. Works for video, RAW photos, design files, and full project folders.</p></div>
+<div class="post-card"><h2><a href="/blog/private-file-sharing-nothing-stored.html">Private File Sharing: Why “Nothing Stored” Beats “Encrypted Storage”</a></h2><p>Encrypted cloud storage still leaves a copy of your file on someone's server. Learn why zero-storage, peer-to-peer sharing is the strongest privacy model for sending files.</p></div>
+<div class="cta"><h3>Try it now &mdash; free, no sign-up</h3><p>Share a file of any size directly from your browser. Nothing is uploaded to a server.</p><a class="btn" href="/">Share a file with Filetra</a></div></article>
+</main>
+<footer>Filetra &mdash; peer-to-peer file sharing. Files transfer directly between browsers via WebRTC.</footer>
 </body>
 </html>
