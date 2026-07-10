@@ -7,10 +7,15 @@
     "dev": "python3 -m http.server 8000",
     "test": "echo \"No tests configured\" && exit 0"
   },
-  "keywords": ["p2p", "file-sharing", "peer-to-peer"],
+  "keywords": [
+    "p2p",
+    "file-sharing",
+    "peer-to-peer"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0"
   }
 }
